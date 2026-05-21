@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Informační Systém - Analyzátor Akcií</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        h1, h2 { color: #2c3e50; }
+        .form-group { margin-bottom: 20px; display: flex; gap: 10px; }
+        input[type="text"] { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px; }
+        button { padding: 10px 20px; background-color: #3498db; color: white; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; }
+        button:hover { background-color: #2980b9; }
+        .box { padding: 15px; border-radius: 4px; margin-bottom: 20px; }
+        .success { background-color: #d4edda; border-left: 5px solid #28a745; color: #155724; }
+        .error { background-color: #f8d7da; border-left: 5px solid #dc3545; color: #721c24; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background-color: #f8f9fa; color: #2c3e50; }
+        .up { color: #28a745; font-weight: bold; }
+        .down { color: #dc3545; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🏛️ Informační systém: Analyzátor akcií</h1>
+    <p>Projekt splňuje zadání webové aplikace s napojením na SQL databázi (SQLite).</p>
+    
+    <form method="POST" class="form-group">
+        <input type="text" name="ticker" placeholder="Zadej Ticker (např. NVDA, AAPL, TSLA)" required>
+        <button type="submit">Analyzovat</button>
+    </form>
+
+    {% if chyba %}
+        <div class="box error">{{ chyba }}</div>
+    {% endif %}
+
+    {% if vysledek %}
+        <div class="box success">
+            <h2>Výsledek hledání: {{ vysledek.ticker }}</h2>
+            <p><strong>Aktuální cena:</strong> {{ "%.2f"|format(vysledek.cena) }} {{ vysledek.mena }}</p>
+            <p><strong>Dnešní změna:</strong> 
+                <span class="{% if vysledek.zmena >= 0 %}up{% else %}down{% endif %}">
+                    {% if vysledek.zmena >= 0 %}+{% endif %}{{ "%.2f"|format(vysledek.zmena) }}%
+                </span>
+            </p>
+        </div>
+    {% endif %}
+
+    <h2>📊 Historie vyhledávání (Načteno z SQL DB)</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Čas dotazu</th>
+                <th>Ticker</th>
+                <th>Cena</th>
+                <th>Změna</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for radek in historie %}
+            <tr>
+                <td>{{ radek[4] }}</td>
+                <td><strong>{{ radek[0] }}</strong></td>
+                <td>{{ "%.2f"|format(radek[1]) }} {{ radek[3] }}</td>
+                <td class="{% if radek[2] >= 0 %}up{% else %}down{% endif %}">
+                    {% if radek[2] >= 0 %}+{% endif %}{{ "%.2f"|format(radek[2]) }}%
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="4">V databázi zatím nejsou žádné záznamy.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+</body>
+</html>
