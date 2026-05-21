@@ -34,6 +34,32 @@ def uloz_do_databaze(ticker, cena, zmena, mena):
     conn.commit()
     conn.close()
 
+    def uloz_do_databaze(ticker, cena, zmena, mena):
+    # 1. Uložení do SQL databáze (pro splnění zadání)
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    aktualni_cas = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    cursor.execute('''
+        INSERT INTO historie_hledani (ticker, cena, zmena, mena, cas_dotazu)
+        VALUES (?, ?, ?, ?, ?)
+    ''', (ticker, cena, zmena, mena, aktualni_cas))
+    conn.commit()
+    
+    # 2. Vytáhnutí kompletní historie pro Markdown soubor
+    cursor.execute('SELECT cas_dotazu, ticker, cena, zmena, mena FROM historie_hledani ORDER BY id DESC')
+    vsechny_radky = cursor.fetchall()
+    conn.close()
+    
+    # 3. Zápis do souboru historie.md ve formátu GitHub tabulky
+    with open("historie.md", "w", encoding="utf-8") as f:
+        f.write("# 📊 Historie vyhledávání akcií\n\n")
+        f.write("| Čas dotazu | Ticker | Cena | Změna |\n")
+        f.write("| :--- | :--- | :--- | :--- |\n")
+        for radek in vsechny_radky:
+            cas, tk, c, zm, mn = radek
+            smer = "📈" if zm >= 0 else "📉"
+            f.write(f"| {cas} | **{tk}** | {c:.2f} {mn} | {zm:+.2f}% {smer} |\n")
+
 def ziskej_historii():
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
