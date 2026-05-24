@@ -12,6 +12,8 @@ erDiagram
         string nazev "Název firmy"
         float cena "Tržní cena"
         float zmena "Změna v %"
+        real high "Denní maximum"
+        real low "Denní minimum"
         string mena "Měna"
         datetime cas_dotazu "Čas uložení"
     }
